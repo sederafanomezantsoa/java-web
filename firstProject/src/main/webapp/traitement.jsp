@@ -1,10 +1,17 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
 <%@ page import="java.io.*" %>
-<%@ page import="org.mindrot.jbcrypt.BCrypt" %>
-
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Traitement</title>
+</head>
+<body>
 	<% String mail = request.getParameter("email");
 		String mdp = request.getParameter("pass");%>
+	<p>mail :  <%= mail %></p>
+	<p>mail :  <%= mdp %></p>
 	<%
 		String dossier = System.getProperty("user.home")+"/dataweb";
 		String cheminInfos = dossier+"/infos.csv";
@@ -16,31 +23,23 @@
         
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter(cheminInfos, true))) {
 			if(mail!=null && mdp != null){
-				
+				boolean x = true;
 				try(BufferedReader reader = new BufferedReader(new FileReader(cheminInfos))){
 		            String ligne;
-		            int x = 1;
 		            while ((ligne = reader.readLine()) != null) {
 		                String[] column = ligne.split(",");
-						if(mail.equals(column[0])){
-							System.out.println("ce mail a déjà du comte");
-							x=0;
+						if(mail==column[0]){
+							out.println("<p style='color:red;'>ce mail a déjà du comte</p>");
+							x=false;
 						}
 
 		            }
-		            if(x==1){
-		            	// On hashe le mot de passe avant de l'écrire
-		            	String mdpHashe = BCrypt.hashpw(mdp, BCrypt.gensalt());
-
-		            	// On écrit l'email et le mot de passe hashé
-		            	writer.write(mail + "," + mdpHashe);
+		            if(x==true){
+			            writer.write(mail + "," + mdp);
 			            writer.newLine(); // Retour à la ligne pour le prochain utilisateur
 			            
-			            System.out.println("Données ajoutées avec succès !");
-			            response.sendRedirect("index.jsp");
-		            }
-		            else{
-		            	response.sendRedirect("singup.php");
+			            out.println("<p style='color:green;'> Données ajoutées avec succès !</p>");
+			            out.println("<p>Fichier enregistré ici : <strong>" + cheminInfos+ "</strong></p>");
 		            }
 					
 				}
@@ -48,11 +47,11 @@
 
 			}
 			else{
-				 System.out.println("mail ou password NULL");
+				 out.println("<p style='color:red;'>mail ou password NULL</p>");
 			}
             
         } catch (IOException e) {
-            System.out.println("Erreur d'écriture : " + e.getMessage());
+            out.println("<p style='color:red;'> Erreur d'écriture : " + e.getMessage() + "</p>");
         }
         
 	%>
